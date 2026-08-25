@@ -550,4 +550,148 @@ document.addEventListener("DOMContentLoaded", () => {
 
     });
 
+    /* =====================================================
+       16. PORTAL DEMO (STARTSEITE)
+       Static prototype only: no production authentication.
+       ===================================================== */
+    if (document.querySelector(".portal-page")) {
+
+        const main = document.querySelector("main");
+
+        main?.insertAdjacentHTML("beforeend", `
+            <section class="portal-slide" id="portal">
+                <div class="container portal-layout">
+                    <div class="portal-intro">
+                        <p class="eyebrow">COREFIX PORTAL</p>
+                        <h2>Alles Wichtige.<br><em>An einem Ort.</em></h2>
+                        <p>Behalten Sie Anfragen, Systeme und die Zusammenarbeit mit CoreFix im Blick. Der Portalbereich wird aktuell als Vorschau vorbereitet.</p>
+                        <p class="portal-note">Für Mitarbeitende und Kunden. Klar, geschützt und jederzeit erreichbar.</p>
+                    </div>
+                    <div class="portal-card">
+                        <div class="portal-tabs" role="tablist">
+                            <button class="portal-tab active" type="button" data-portal-tab="register">Anmelden</button>
+                            <button class="portal-tab" type="button" data-portal-tab="login">Einloggen</button>
+                        </div>
+                        <form class="portal-form" id="portalRegister" novalidate>
+                            <h3>Portalzugang anfragen</h3>
+                            <p>Wir richten Ihren Zugang nach einer kurzen Prüfung persönlich ein.</p>
+                            <label>Geschäftliche E-Mail<input type="email" required placeholder="name@unternehmen.de"></label>
+                            <label>Passwort festlegen<input id="portalPassword" type="password" required placeholder="Mindestens 10 Zeichen"></label>
+                            <ul class="password-rules"><li data-rule="length">Mindestens 10 Zeichen</li><li data-rule="upper">Mindestens ein Großbuchstabe</li><li data-rule="lower">Mindestens ein Kleinbuchstabe</li><li data-rule="number">Mindestens eine Zahl</li></ul>
+                            <button class="button button-primary" type="submit">Zugang anfragen <span>→</span></button>
+                            <p class="portal-message" aria-live="polite"></p>
+                        </form>
+                        <form class="portal-form hidden" id="portalLogin" novalidate>
+                            <h3>Willkommen zurück</h3>
+                            <p>Bitte melden Sie sich mit Ihren Zugangsdaten an.</p>
+                            <label>E-Mail-Adresse<input type="email" required placeholder="name@unternehmen.de"></label>
+                            <label>Passwort<input type="password" required placeholder="Ihr Passwort"></label>
+                            <button class="button button-primary" type="submit">Einloggen <span>→</span></button>
+                            <p class="portal-message" aria-live="polite"></p>
+                        </form>
+                    </div>
+                </div>
+            </section>
+            <div class="admin-demo" id="adminDemo" hidden>
+                <div class="admin-demo-card">
+                    <button class="admin-close" type="button" aria-label="Admin-Demo schließen">×</button>
+                    <p class="eyebrow">ADMIN-DEMO</p><h2>Geschützter Bereich</h2>
+                    <p>Dies ist ein visueller Prototyp. Er besitzt keine echte Zugriffskontrolle.</p>
+                    <form id="adminDemoForm"><label>Benutzername<input autocomplete="username" required></label><label>Passwort<input type="password" autocomplete="current-password" required></label><button class="button button-primary" type="submit">Demo öffnen</button><p class="portal-message" aria-live="polite"></p></form>
+                </div>
+            </div>
+        `);
+
+        const register = document.getElementById("portalRegister");
+        const password = document.getElementById("portalPassword");
+        const setMessage = (form, message, type) => {
+            const output = form.querySelector(".portal-message");
+            output.textContent = message;
+            output.className = `portal-message ${type}`;
+        };
+        const checkRules = () => {
+            const value = password.value;
+            const checks = { length: value.length >= 10, upper: /[A-Z]/.test(value), lower: /[a-z]/.test(value), number: /\d/.test(value) };
+            document.querySelectorAll(".password-rules li").forEach(item => item.classList.toggle("valid", checks[item.dataset.rule]));
+            return Object.values(checks).every(Boolean);
+        };
+        password.addEventListener("input", checkRules);
+        register.addEventListener("submit", event => {
+            event.preventDefault();
+            if (!register.checkValidity() || !checkRules()) return setMessage(register, "Bitte erfüllen Sie alle Passwortkriterien.", "error");
+            setMessage(register, "Vielen Dank. Ihre Zugangsanfrage wurde als Demo vorgemerkt.", "success");
+            register.reset(); checkRules();
+        });
+
+        document.querySelectorAll(".portal-tab").forEach(tab => tab.addEventListener("click", () => {
+            const registration = tab.dataset.portalTab === "register";
+            document.querySelectorAll(".portal-tab").forEach(button => button.classList.toggle("active", button === tab));
+            register.classList.toggle("hidden", !registration);
+            document.getElementById("portalLogin").classList.toggle("hidden", registration);
+        }));
+        document.getElementById("portalLogin").addEventListener("submit", event => { event.preventDefault(); setMessage(event.currentTarget, "Diese Portal-Anmeldung ist in der Demo noch nicht mit einem Server verbunden.", "error"); });
+
+        const admin = document.getElementById("adminDemo");
+        document.addEventListener("keydown", event => { if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a") admin.hidden = false; });
+        admin.querySelector(".admin-close").addEventListener("click", () => admin.hidden = true);
+        document.getElementById("adminDemoForm").addEventListener("submit", event => {
+            event.preventDefault();
+            const fields = event.currentTarget.querySelectorAll("input");
+            const allowed = [...fields].every(field => field.value === "Temp12345678");
+            setMessage(event.currentTarget, allowed ? "Admin-Demo geöffnet – keine produktive Anmeldung." : "Ungültige Demo-Zugangsdaten.", allowed ? "success" : "error");
+        });
+    }
+
+    /* =====================================================
+       17. ENTERPRISE MICRO-INTERACTIONS
+       ===================================================== */
+    if (document.querySelector(".hero-enterprise")) {
+        document.querySelector(".solutions-section")?.insertAdjacentHTML("afterend", `
+            <section class="campaign-section">
+                <div class="container">
+                    <div class="campaign-heading"><p class="eyebrow">COREFIX IM EINSATZ</p><h2>IT, die man<br><em>nicht erklären muss.</em></h2><p>Ein Blick auf das, was im Alltag wirklich zählt: Klarheit, Sicherheit und ein Ansprechpartner, der dranbleibt.</p></div>
+                    <div class="campaign-grid">
+                        <article class="campaign-card campaign-dark"><img src="assets/corefix-logo.png" alt="CoreFix Logo"><span class="campaign-kicker">IMMER ERREICHBAR</span><h3>Wenn es zählt,<br><b>sind wir da.</b></h3><p>Persönlicher Support für Fragen, Störungen und den nächsten Schritt.</p><div class="campaign-lines" aria-hidden="true"><i></i><i></i><i></i></div></article>
+                        <article class="campaign-card campaign-light"><img src="assets/corefix-logo.png" alt="CoreFix Logo"><span class="campaign-kicker">MIT WEITBLICK</span><h3>Ihre IT.<br><b>Ihr Tempo.</b></h3><p>Wir verbinden sichere Technik mit Lösungen, die zu Ihrem Unternehmen passen.</p><div class="campaign-orbit" aria-hidden="true"><span>CF</span></div></article>
+                        <article class="campaign-card campaign-blue"><img src="assets/corefix-logo.png" alt="CoreFix Logo"><span class="campaign-kicker">KLAR GESCHÜTZT</span><h3>Ein gutes Gefühl.<br><b>Jeden Tag.</b></h3><ul><li>Systeme im Blick</li><li>Daten geschützt</li><li>Hilfe, wenn sie gebraucht wird</li></ul></article>
+                    </div>
+                </div>
+            </section>
+        `);
+        document.body.insertAdjacentHTML("afterbegin", '<div class="scroll-progress" aria-hidden="true"><span></span></div>');
+        const progress = document.querySelector(".scroll-progress span");
+        const updateProgress = () => {
+            const max = document.documentElement.scrollHeight - window.innerHeight;
+            progress.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
+        };
+        updateProgress();
+        window.addEventListener("scroll", updateProgress, { passive: true });
+
+        const interactiveNodes = document.querySelectorAll(".architecture-node");
+        const coreLabel = document.querySelector(".architecture-core small");
+        interactiveNodes.forEach(node => {
+            node.tabIndex = 0;
+            node.setAttribute("role", "button");
+            node.setAttribute("aria-pressed", "false");
+            const selectNode = () => {
+                interactiveNodes.forEach(other => {
+                    const selected = other === node;
+                    other.classList.toggle("is-active", selected);
+                    other.setAttribute("aria-pressed", String(selected));
+                });
+                coreLabel.innerHTML = `${node.querySelector("span").textContent.toUpperCase()}<br>VERBUNDEN`;
+            };
+            node.addEventListener("click", selectNode);
+            node.addEventListener("keydown", event => {
+                if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectNode(); }
+            });
+        });
+
+        const revealTargets = document.querySelectorAll(".statement-grid, .enterprise-card, .principles-visual, .principles-copy, .industry-list, .portal-intro, .portal-card, .enterprise-cta");
+        const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+            if (entry.isIntersecting) { entry.target.classList.add("is-revealed"); observer.unobserve(entry.target); }
+        }), { threshold: .12 });
+        revealTargets.forEach(target => { target.classList.add("enterprise-reveal"); observer.observe(target); });
+    }
+
 });
